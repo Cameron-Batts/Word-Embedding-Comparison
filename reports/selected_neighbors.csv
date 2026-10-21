@@ -1,0 +1,83 @@
+model,query,original_rank,neighbor,cosine_similarity
+Word2Vec skip-gram,disney,1,animate,0.7659988403320312
+Word2Vec skip-gram,disney,2,animated,0.7394905090332031
+Word2Vec skip-gram,disney,3,animation,0.7315606474876404
+Word2Vec skip-gram,disney,6,mermaid,0.7021067142486572
+Word2Vec skip-gram,disney,8,hunchback,0.6920586228370667
+FastText skip-gram,oscar,1,nominee,0.8377491235733032
+FastText skip-gram,oscar,2,nomi,0.8173502087593079
+FastText skip-gram,oscar,3,nominate,0.8036504983901978
+FastText skip-gram,oscar,4,academy,0.7960447669029236
+FastText skip-gram,oscar,5,nominated,0.7956023812294006
+FastText skip-gram,oscar,6,nomination,0.7895269393920898
+FastText skip-gram,oscar,7,award,0.779848575592041
+FastText skip-gram,oscar,8,winner,0.71983802318573
+FastText skip-gram,oscar,9,globe,0.7042731046676636
+FastText CBOW,actress,1,actresses,0.9721896052360535
+FastText CBOW,actress,2,roles,0.8735337853431702
+FastText CBOW,actress,3,role,0.8651092648506165
+FastText CBOW,actress,5,support,0.844857394695282
+FastText CBOW,actress,6,actor,0.8403128385543823
+FastText CBOW,actress,8,charisma,0.8334721922874451
+FastText CBOW,actress,9,performer,0.833145797252655
+Word2Vec CBOW,kung + fu,1,choreograph,0.8792310953140259
+Word2Vec CBOW,kung + fu,4,heavy,0.8193675875663757
+Word2Vec CBOW,kung + fu,6,choreography,0.8117879033088684
+Word2Vec CBOW,kung + fu,7,spectacular,0.809482991695404
+Word2Vec CBOW,kung + fu,8,slo,0.8040258884429932
+Word2Vec CBOW,kung + fu,10,stunt,0.7941833138465881
+Word2Vec skip-gram,vampire,1,slayer,0.6585524082183838
+Word2Vec skip-gram,vampire,3,vampires,0.617953360080719
+Word2Vec skip-gram,vampire,6,sunlight,0.591738760471344
+Word2Vec skip-gram,vampire,7,lore,0.5853643417358398
+Word2Vec skip-gram,vampire,8,bitten,0.5838931202888489
+Word2Vec skip-gram,vampire,10,myth,0.5703905820846558
+FastText skip-gram,vampire,1,vampires,0.9570825099945068
+FastText skip-gram,vampire,2,vamp,0.825384795665741
+FastText skip-gram,vampire,3,empire,0.7255818843841553
+FastText skip-gram,vampire,10,superheroes,0.5865840911865234
+Word2Vec CBOW,vampire,1,mar,0.7687244415283203
+Word2Vec CBOW,vampire,2,friday,0.751194953918457
+Word2Vec CBOW,vampire,3,runner,0.7508999705314636
+Word2Vec CBOW,vampire,4,soldier,0.7380750775337219
+Word2Vec CBOW,vampire,6,battlefield,0.7209727764129639
+Word2Vec CBOW,vampire,7,invasion,0.719186007976532
+Word2Vec CBOW,vampire,8,disintegrate,0.7183834314346313
+Word2Vec CBOW,vampire,9,warrior,0.7173875570297241
+Word2Vec CBOW,vampire,10,planet,0.7148244976997375
+FastText CBOW,vampire,1,vampires,0.9444917440414429
+FastText CBOW,vampire,2,vamp,0.9130301475524902
+FastText CBOW,vampire,3,empire,0.8630027770996094
+FastText CBOW,vampire,4,urban,0.821379542350769
+FastText CBOW,vampire,5,trooper,0.8204208612442017
+FastText CBOW,vampire,6,error,0.8110852241516113
+FastText CBOW,vampire,7,mirror,0.8088029026985168
+FastText CBOW,vampire,8,eraser,0.8048674464225769
+FastText CBOW,vampire,9,laser,0.8014891147613525
+FastText CBOW,vampire,10,cream,0.7789744138717651
+Google News Word2Vec,computer,1,computers,0.7979379296302795
+Google News Word2Vec,computer,2,laptop,0.6640493273735046
+Google News Word2Vec,computer,3,laptop_computer,0.6548868417739868
+Google News Word2Vec,computer,4,Computer,0.6473335027694702
+Google News Word2Vec,computer,5,com_puter,0.6082079410552979
+Google News Word2Vec,computer,7,mainframes_minicomputers,0.5617720484733582
+Google News Word2Vec,computer,8,laptop_computers,0.5585449934005737
+Google News Word2Vec,computer,9,PC,0.5539618134498596
+FastText CBOW,computer,1,interpreter,0.8746314644813538
+FastText CBOW,computer,2,composer,0.8580012917518616
+FastText CBOW,computer,3,consumer,0.8563611507415771
+FastText CBOW,computer,4,filter,0.8518393635749817
+FastText CBOW,computer,5,outer,0.8512398600578308
+FastText CBOW,computer,6,thunder,0.8370407223701477
+FastText CBOW,computer,7,underwater,0.836102306842804
+FastText CBOW,computer,8,blunder,0.8227631449699402
+FastText CBOW,computer,9,conquer,0.8082564473152161
+Google News Word2Vec,vampire,1,vampires,0.8275951743125916
+Google News Word2Vec,vampire,2,werewolf,0.7311668395996094
+Google News Word2Vec,vampire,3,Vampire,0.6787410378456116
+Google News Word2Vec,vampire,4,vampiric,0.6722390651702881
+Google News Word2Vec,vampire,5,undead,0.6609407663345337
+Google News Word2Vec,vampire,6,bloodsucker,0.6599818468093872
+Google News Word2Vec,vampire,7,werewolves,0.6567668914794922
+Google News Word2Vec,vampire,8,bloodsucking,0.6399244666099548
+Google News Word2Vec,vampire,10,vampire_slayer,0.6334654092788696
