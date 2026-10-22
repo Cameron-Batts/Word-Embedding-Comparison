@@ -46,7 +46,7 @@ NLTK downloads the corpus, WordNet and tagger at runtime. Set `RUN_PRETRAINED = 
 The default workflow was rerun successfully; earlier outputs remain historical context. Original training emitted repeated Gensim `our_dot_float` numerical warnings; retained results are illustrative and unverified. Multiworker training may vary despite seed=42. Resolve warnings and benchmark retrieval quality before operational use. Tested package versions are recorded in requirements-validation.txt.
 
 ## Files
-- `notebooks/word_embedding_comparison.ipynb`: cleaned workflow and selected original outputs.
+- `notebooks/word_embedding_comparison.ipynb`: workflow and saved validation outputs (source-text displays omitted).
 - `reports/word_embedding_comparison.html`: readable analysis.
 - `reports/selected_neighbors.csv`: selected non-person neighbors with original ranks and scores.
 - `requirements.txt`: dependencies.
