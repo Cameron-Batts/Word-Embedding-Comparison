@@ -1,132 +1,78 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Word Embedding Comparison | Cameron Batts</title><style>body{margin:0;background:#f7f8fa;color:#152540;font:16px/1.65 system-ui}main{max-width:950px;margin:auto;padding:32px 24px}h1{font:bold 2.4rem Georgia}h2{border-bottom:2px solid #e8c97a;margin-top:36px}pre{padding:18px;background:white;border-left:3px solid #c9a84c;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}details{margin:16px 0}summary{cursor:pointer}p{overflow-wrap:anywhere}a{color:#1a3560}</style><main><a href="/">← Portfolio</a><h1>Word Embeddings: Domain-Specific vs. Pretrained Models</h1><p><strong>Cameron Batts</strong></p><p>Python · NLP · Gensim · Word2Vec · FastText · CBOW · Skip-gram</p><h2>Project overview</h2><p>Explore how corpus domain, training architecture, and subword information affect the nearest neighbors returned by word embeddings. Train four 100-dimensional models on 2,000 movie reviews and compare selected queries with 300-dimensional pretrained Google News embeddings.</p><h2>Business relevance</h2><p>Embedding similarity can support content discovery, search, and vocabulary exploration. This project examines whether nearby terms reflect useful meaning or merely shared spelling and corpus context; it does not measure production search performance.</p><h2>Data and attribution</h2><p>The movie-review corpus is distributed by NLTK and associated with Pang and Lee (2004), *Sentimental Education: Sentiment Analysis Using Subjectivity Summarization Based on Minimum Cuts*. Source: https://www.cs.cornell.edu/people/pabo/movie-review-data/ ; paper: https://aclanthology.org/P04-1035/ . Attribution is retained. Raw review excerpts and saved person-name neighbors are omitted from this presentation.</p><h2>Execution status</h2><p>Selected aggregate and neighbor results are retained from the supplied notebook. The original training emitted repeated Gensim numerical warnings (`our_dot_float`); models and scores have not been independently retrained or verified. The cleaned code is syntax-checked, not execution-validated. Original four-worker training is retained; results may vary despite the fixed seed.</p><details><summary>Python code</summary><pre>import pandas as pd
-import numpy as np
-import gensim
-import nltk
-from nltk.corpus import movie_reviews
-from nltk.stem import WordNetLemmatizer
-from gensim.models import Word2Vec, FastText
-import gensim.parsing.preprocessing as preprocess
-
-nltk.download([&#x27;movie_reviews&#x27;, &#x27;wordnet&#x27;, &#x27;averaged_perceptron_tagger_eng&#x27;], quiet=True)
-doc = [&#x27; &#x27;.join(movie_reviews.words(file_id)) for file_id in movie_reviews.fileids()]
-text_series = pd.Series(doc)
-text_series.str.len().describe()
-</pre></details><pre>count     2000.0000
-mean      3904.2600
-std       1718.6621
-min         91.0000
-25%       2745.5000
-50%       3640.5000
-75%       4730.5000
-max      15097.0000
-dtype: float64</pre><h2>Text preprocessing</h2><p>Remove punctuation, numbers, stopwords, HTML tags, and repeated whitespace; apply part-of-speech-aware WordNet lemmatization and finish with lowercase tokenization. The final Gensim tokenization also filters tokens by its default length rules. Proper names can remain in the underlying corpus and may appear when the notebook is rerun.</p><details><summary>Python code</summary><pre>CUSTOM_FILTERS = [preprocess.strip_punctuation,
-    preprocess.strip_numeric,
-    preprocess.remove_stopwords, 
-    preprocess.strip_tags, 
-    preprocess.strip_multiple_whitespaces,]</pre></details><details><summary>Python code</summary><pre>def lemmatize_text(token_list, wnl):
-  &quot;&quot;&quot;
-  This function tags the pos of the input tokens,
-  and lemmatize the tokens.
-  &quot;&quot;&quot;
-  # POS tag each word
-  for word, tag in nltk.pos_tag(token_list):
-    # Mapping the pos tags to the types supported by wnl
-    if tag.startswith(&quot;NN&quot;):
-      yield wnl.lemmatize(word, pos=&#x27;n&#x27;)
-    elif tag.startswith(&#x27;VB&#x27;):
-      yield wnl.lemmatize(word, pos=&#x27;v&#x27;)
-    elif tag.startswith(&#x27;JJ&#x27;):
-      yield wnl.lemmatize(word, pos=&#x27;a&#x27;)
-    elif tag.startswith(&#x27;RB&#x27;):
-      yield wnl.lemmatize(word, pos=&#x27;r&#x27;)
-    else:
-      yield wnl.lemmatize(word)
-
-# Remove punctuations, digits, and stopwords with your defined CUSTOM_FILTERS
-processed_text = text_series.apply(lambda x: preprocess.preprocess_string(x, CUSTOM_FILTERS))
-
-# Lemmatize the tokens
-wnl = nltk.WordNetLemmatizer()
-processed_text = processed_text.apply(lambda x: &quot; &quot;.join(lemmatize_text(x, wnl)))
-
-# Lowercase the letters and return a token list of each review
-processed_text = processed_text.apply(lambda x: gensim.utils.simple_preprocess(x, deacc=False))</pre></details><h2>Four model configurations</h2><p>Each model uses vector_size=100, window=5, min_count=5, epochs=10, seed=42, and workers=4. Word2Vec learns whole-word vectors; FastText also uses character subword representations. CBOW predicts a target from context, while skip-gram predicts context from a target. The same review corpus supports all four configurations.</p><details><summary>Python code</summary><pre>from gensim.models import Word2Vec, FastText
-# vector_size = number of dimensions in each word vector
-# window = how many words on each side count as context
-# min_count = ignore words that show up fewer than 5 times
-# sg = 0 means CBOW, sg = 1 means skip-gram
-w2v_cbow = Word2Vec(sentences=processed_text, vector_size=100, window=5, min_count=5, sg=0, workers=4, epochs=10, seed=42)
-w2v_sg = Word2Vec(sentences=processed_text, vector_size=100, window=5, min_count=5, sg=1, workers=4, epochs=10, seed=42)
-ft_cbow = FastText(sentences=processed_text, vector_size=100, window=5, min_count=5, sg=0, workers=4, epochs=10, seed=42)
-ft_sg = FastText(sentences=processed_text, vector_size=100, window=5, min_count=5, sg=1, workers=4, epochs=10, seed=42)
-</pre></details><h2>Inspect nearest neighbors</h2><p>Cosine similarity identifies embedding neighbors, which can include related topics, morphological variants, and unrelated-looking corpus associations. It does not establish synonymy or downstream accuracy. The examples below retain selected non-person neighbors from the original output; they are not complete top-ten lists.</p><h3>Word2Vec skip-gram — disney</h3><details><summary>Python code</summary><pre># top-10 most similar words for &quot;disney&quot; using w2v_sg
-w2v_sg.wv.most_similar(positive=&quot;disney&quot;)</pre></details><pre>animate: 0.7660
-animated: 0.7395
-animation: 0.7316
-mermaid: 0.7021
-hunchback: 0.6921
-</pre><h3>FastText skip-gram — oscar</h3><details><summary>Python code</summary><pre># top-10 most similar words for &quot;oscar&quot; using ft_sg
-ft_sg.wv.most_similar(positive=&quot;oscar&quot;)</pre></details><pre>nominee: 0.8377
-nomi: 0.8174
-nominate: 0.8037
-academy: 0.7960
-nominated: 0.7956
-nomination: 0.7895
-award: 0.7798
-winner: 0.7198
-globe: 0.7043
-</pre><h3>FastText CBOW — actress</h3><details><summary>Python code</summary><pre># top-10 most similar words for &quot;actress&quot; using ft_cbow
-ft_cbow.wv.most_similar(positive=&quot;actress&quot;)</pre></details><pre>actresses: 0.9722
-roles: 0.8735
-role: 0.8651
-support: 0.8449
-actor: 0.8403
-charisma: 0.8335
-performer: 0.8331
-</pre><h3>Word2Vec CBOW — kung + fu</h3><details><summary>Python code</summary><pre># top-10 most similar words for &quot;kung&quot; and &quot;fu&quot; using w2v_cbow
-w2v_cbow.wv.most_similar(positive=[&quot;kung&quot;, &quot;fu&quot;])</pre></details><pre>choreograph: 0.8792
-heavy: 0.8194
-choreography: 0.8118
-spectacular: 0.8095
-slo: 0.8040
-stunt: 0.7942
-</pre><h3>Word2Vec skip-gram — vampire</h3><details><summary>Python code</summary><pre>#Top-10 most similar words for &#x27;vampire&#x27; using w2v_sg
-w2v_sg.wv.most_similar(positive=&quot;vampire&quot;)</pre></details><pre>slayer: 0.6586
-vampires: 0.6180
-sunlight: 0.5917
-lore: 0.5854
-bitten: 0.5839
-myth: 0.5704
-</pre><h3>FastText skip-gram — vampire</h3><details><summary>Python code</summary><pre>#Top-10 most similar words for &#x27;vampire&#x27; using ft_sg
-ft_sg.wv.most_similar(positive=&quot;vampire&quot;)</pre></details><pre>vampires: 0.9571
-vamp: 0.8254
-empire: 0.7256
-superheroes: 0.5866
-</pre><h3>Word2Vec CBOW — vampire</h3><details><summary>Python code</summary><pre>#Top-10 most similar words for &#x27;vampire&#x27; using w2v_cbow
-w2v_cbow.wv.most_similar(positive=&quot;vampire&quot;)</pre></details><pre>mar: 0.7687
-friday: 0.7512
-runner: 0.7509
-soldier: 0.7381
-battlefield: 0.7210
-invasion: 0.7192
-disintegrate: 0.7184
-warrior: 0.7174
-planet: 0.7148
-</pre><h3>FastText CBOW — vampire</h3><details><summary>Python code</summary><pre>#Top-10 most similar words for &#x27;vampire&#x27; using ft_cbow
-ft_cbow.wv.most_similar(positive=&quot;vampire&quot;)</pre></details><pre>vampires: 0.9445
-vamp: 0.9130
-empire: 0.8630
-urban: 0.8214
-trooper: 0.8204
-error: 0.8111
-mirror: 0.8088
-eraser: 0.8049
-laser: 0.8015
-cream: 0.7790
-</pre><h2>Domain and subword observations</h2><p>For the animation-studio query, Word2Vec skip-gram returned animation-related terms such as animate (0.7660) and animation (0.7316). For the award query, FastText skip-gram returned nominee (0.8377) and nomination (0.7895).</p><p>For vampire, FastText skip-gram returned vampires (0.9571) but also empire (0.7256); FastText CBOW likewise included empire, mirror, and laser. Shared character fragments can influence similarity without guaranteeing a strong conceptual relationship. Word2Vec skip-gram returned genre-related words such as slayer, sunlight, lore, and bitten. These observations are qualitative, not a model ranking.</p><h2>Optional pretrained benchmark</h2><p>Google News vectors require a substantial download and memory allocation. Enable the following cell only when resources are available. It loads pretrained weights at runtime rather than bundling them with the project. The pretrained model has different dimensionality, vocabulary and training data, so raw similarity scores are not a common quality scale.</p><details><summary>Python code</summary><pre>RUN_PRETRAINED = False
-if RUN_PRETRAINED:
-    import gensim.downloader as api
-    pretrained = api.load(&#x27;word2vec-google-news-300&#x27;)
-    for token in [&#x27;computer&#x27;, &#x27;vampire&#x27;]:
-        print(token, pretrained.most_similar(positive=token, topn=10))
-</pre></details><h2>General vocabulary comparison</h2><p>The original Google News output for computer included computers (0.7979), laptop (0.6640), and laptop_computer (0.6549). The domain-trained FastText CBOW output included interpreter (0.8746), composer (0.8580), and consumer (0.8564). The larger scores in the latter do not make these stronger general-computing matches.</p><p>For vampire, the pretrained model included vampires (0.8276), werewolf (0.7312), and undead (0.6609). The domain-trained FastText skip-gram model mixed morphology with film-specific associations. The two corpora encode different contexts.</p><h2>Applications and limitations</h2><p>- Domain embeddings can expose useful specialized vocabulary, but small-corpus associations may not generalize.</p><p>- FastText can synthesize vectors for unseen words using subword components; a synthesized vector is not evidence of reliable meaning. Word2Vec requires a learned vocabulary entry.</p><p>- Mean word vectors provide a simple sentence representation but lose word order. Sentence-level representations should be evaluated for the intended task.</p><p>- The 2,000-review corpus reflects a limited, historical movie domain. No relevance judgments, downstream benchmark, or quantitative model-quality comparison was completed.</p><p>- Address the original numerical warnings, record dependency versions, repeat training, and use a labeled retrieval benchmark before selecting a model for deployment.</p><h2>Author</h2><p>Cameron Batts</p></main></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Word Embeddings: Domain-Specific vs. Pretrained Models | Cameron Batts</title><style>body{margin:0;background:#f7f8fa;color:#152540;font:16px/1.65 system-ui}main{max-width:950px;margin:auto;padding:32px 24px}h1{font:bold 2.4rem Georgia}h2{border-bottom:2px solid #e8c97a;margin-top:36px}pre{padding:18px;background:white;border-left:3px solid #c9a84c;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}details{margin:16px 0}summary{cursor:pointer}p{overflow-wrap:anywhere}a{color:#1a3560}</style><style>img{max-width:100%;height:auto}table{border-collapse:collapse;width:100%;margin:20px 0}th,td{padding:8px;border-bottom:1px solid #ccd3dc;text-align:left}pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:16px;background:#fff}a{color:#1a3560}figure{margin:24px 0}</style></head><body><main><a href="https://cameron-batts.github.io/">← Portfolio</a><h1>Word Embeddings: Domain-Specific vs. Pretrained Models</h1>
+<p><strong>Author:</strong> Cameron Batts<br />
+<strong>Tools:</strong> Python · Gensim · NLTK · pandas · NumPy</p>
+<h2>Validation update - October 22, 2026</h2>
+<p>All 13 default-workflow cells completed on 2,000 reviews, including four ten-epoch embedding fits. Nearest-neighbor examples are kept local.</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th style="text-align:right">Vocabulary</th>
+<th style="text-align:right">vampire/vampires cosine</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>w2v_cbow</td>
+<td style="text-align:right">11,829</td>
+<td style="text-align:right">0.6598</td>
+</tr>
+<tr>
+<td>w2v_sg</td>
+<td style="text-align:right">11,829</td>
+<td style="text-align:right">0.5827</td>
+</tr>
+<tr>
+<td>ft_cbow</td>
+<td style="text-align:right">11,829</td>
+<td style="text-align:right">0.9384</td>
+</tr>
+<tr>
+<td>ft_sg</td>
+<td style="text-align:right">11,829</td>
+<td style="text-align:right">0.9590</td>
+</tr>
+</tbody>
+</table>
+<p>The optional Google News download remained disabled. Historical Google News comparisons were not rerun. Multiworker training can vary despite seed 42; cosine similarity is not downstream model accuracy or a cross-space quality ranking.</p>
+<p><a href="https://github.com/Cameron-Batts/Word-Embedding-Comparison/blob/main/reports/validation_results.json">Aggregate validation record</a>. <a href="https://github.com/Cameron-Batts/Word-Embedding-Comparison/blob/main/validation/rerun_analysis.py">Repeatable validation script</a>. Run <code>python validation/rerun_analysis.py</code> from the project root. Install <code>requirements-validation.txt</code> first; source CSVs stay local.</p>
+<h2>Business Problem</h2>
+<p>Semantic search and content discovery depend on useful text representations. This project explores how domain-specific training, architecture and subword features affect nearest-neighbor meaning.</p>
+<h2>Project Approach</h2>
+<ul>
+<li>Load 2,000 movie reviews through NLTK.</li>
+<li>Clean and lemmatize text with part-of-speech tags.</li>
+<li>Train Word2Vec and FastText using both CBOW and skip-gram.</li>
+<li>Use 100 dimensions, window=5, min_count=5, epochs=10, seed=42 and workers=4.</li>
+<li>Inspect single-token and combined-token queries.</li>
+<li>Compare selected results with optional 300-dimensional Google News embeddings.</li>
+</ul>
+<h2>Historical findings and original context</h2>
+<ul>
+<li>Domain Word2Vec skip-gram associated an animation-studio query with animate (0.7660) and animation (0.7316).</li>
+<li>FastText skip-gram associated vampire with vampires (0.9571) but also empire (0.7256), illustrating that subword resemblance can affect results.</li>
+<li>Pretrained computer neighbors included computers and laptop; the domain model returned less relevant terms despite larger cosine scores.</li>
+<li>Similarity scores across different embedding spaces are not a model-quality ranking. No downstream accuracy or business impact was measured.</li>
+</ul>
+<h2>Run</h2>
+<pre><code class="language-bash">python -m pip install -r requirements.txt
+jupyter lab notebooks/word_embedding_comparison.ipynb
+</code></pre>
+<p>NLTK downloads the corpus, WordNet and tagger at runtime. Set <code>RUN_PRETRAINED = True</code> only when sufficient download bandwidth, disk and RAM are available. Pretrained weights are not bundled. Four FastText/Word2Vec training runs may require substantial memory and time.</p>
+<h2>Validation</h2>
+<p>The default workflow was rerun successfully; earlier outputs remain historical context. Original training emitted repeated Gensim <code>our_dot_float</code> numerical warnings; retained results are illustrative and unverified. Multiworker training may vary despite seed=42. Resolve warnings and benchmark retrieval quality before operational use. Tested package versions are recorded in requirements-validation.txt.</p>
+<h2>Files</h2>
+<ul>
+<li><code>notebooks/word_embedding_comparison.ipynb</code>: cleaned workflow and selected original outputs.</li>
+<li><code>reports/word_embedding_comparison.html</code>: readable analysis.</li>
+<li><code>reports/selected_neighbors.csv</code>: selected non-person neighbors with original ranks and scores.</li>
+<li><code>requirements.txt</code>: dependencies.</li>
+<li><code>portfolio_card.html</code>: project card matching the portfolio.</li>
+</ul>
+<h2>Sources</h2>
+<p>Movie Review Data — Pang and Lee (2004): https://www.cs.cornell.edu/people/pabo/movie-review-data/ . Paper: https://aclanthology.org/P04-1035/ . NLTK distributes the corpus. Gensim provides the optional <code>word2vec-google-news-300</code> model through its downloader. Observe each source's applicable terms; raw reviews and pretrained weights are not redistributed here.</p>
+<h2>Author</h2>
+<p>Cameron Batts<br />
+GitHub: https://github.com/Cameron-Batts<br />
+Portfolio: https://cameron-batts.github.io</p>
+</main></body></html>

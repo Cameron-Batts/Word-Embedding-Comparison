@@ -1,0 +1,44 @@
+{
+  "reviews": 2000,
+  "models": {
+    "w2v_cbow": {
+      "vocabulary_size": 11829,
+      "vector_size": 100,
+      "epochs": 10,
+      "vampire_vampires_similarity": 0.6598002910614014
+    },
+    "w2v_sg": {
+      "vocabulary_size": 11829,
+      "vector_size": 100,
+      "epochs": 10,
+      "vampire_vampires_similarity": 0.5826593041419983
+    },
+    "ft_cbow": {
+      "vocabulary_size": 11829,
+      "vector_size": 100,
+      "epochs": 10,
+      "vampire_vampires_similarity": 0.9384044408798218
+    },
+    "ft_sg": {
+      "vocabulary_size": 11829,
+      "vector_size": 100,
+      "epochs": 10,
+      "vampire_vampires_similarity": 0.9590243101119995
+    }
+  },
+  "optional_pretrained_run": false,
+  "checked_at_utc": "2026-10-22T21:57:02.881967+00:00",
+  "python": "3.12.14",
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "gensim": "4.4.0",
+    "nltk": "3.10.4",
+    "scipy": "1.17.0"
+  },
+  "executed_code_cells": 13,
+  "generated_figures": 0,
+  "elapsed_seconds": 120.58185696601868,
+  "input_sha256": {},
+  "scope": "Full default workflow: four 10-epoch embedding models. Optional Google News download disabled. Neighbor outputs kept local; multiworker nondeterminism remains."
+}
